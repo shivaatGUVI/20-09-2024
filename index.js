@@ -40,9 +40,60 @@ let quiz = [
       "Cascading Style Sheets",
     ],
     score: 5,
-    buttons: ["previous"],
+    buttons: ["previous", "submit"],
   },
 ];
+
+let question = 0; // quiz is an array and the first element is at zeroth position
+let score = 0;
+let userAnswer = "";
+scoreElement.innerText = score; // to show the default/initial score
+
+function previousQuestion() {
+  question--;
+  let object = quiz[question];
+  createQuizElement(object);
+  userAnswer = ""; // resetting the userAnswer
+}
+
+function nextQuestion() {
+  question++;
+  let object = quiz[question];
+  createQuizElement(object);
+  userAnswer = ""; // resetting the userAnswer
+}
+
+function updateScore() {
+  let actualAnswer = quiz[question].answer;
+
+  if (userAnswer === actualAnswer) {
+    score = score + quiz[question].score;
+  }
+  scoreElement.innerText = score;
+}
+
+function buttonClickHandler(event) {
+  //   nextQuestion(); -> increase my question with 1 which would never match my current question
+  let buttonType = event.target.innerText;
+  if (buttonType === "Next") {
+    updateScore();
+    nextQuestion();
+  } else if (buttonType === "Previous") {
+    previousQuestion();
+  } else if (buttonType === "Submit") {
+    updateScore();
+    alert(`Your score is ${score}`);
+    question = 0;
+    score = 0;
+    userAnswer = "";
+    scoreElement.innerText = score;
+    createQuizElement(quiz[question]);
+  }
+}
+
+function optionClickHandler(event) {
+  userAnswer = event.target.value;
+}
 
 // to create the option element
 function createOptions(string) {
@@ -54,12 +105,16 @@ function createOptions(string) {
 
   let optionElement = document.createElement("input");
   optionElement.setAttribute("type", "radio");
+  optionElement.setAttribute("name", "answers");
+  optionElement.setAttribute("value", string);
   optionElement.setAttribute("id", string);
 
   // label for option element
   let labelElement = document.createElement("label");
   labelElement.setAttribute("for", string);
   labelElement.innerText = string;
+
+  optionElement.addEventListener("click", optionClickHandler);
 
   spanElement.append(optionElement, labelElement);
 
@@ -68,6 +123,8 @@ function createOptions(string) {
 
 // to create the button element
 function createButtons(string) {
+  // previous, next
+
   let buttonElement = document.createElement("button");
   buttonElement.innerText = string;
   buttonElement.classList.add(
@@ -79,6 +136,8 @@ function createButtons(string) {
   );
   buttonElement.style.backgroundColor = "grey";
 
+  buttonElement.addEventListener("click", buttonClickHandler);
+
   return buttonElement; // To push this element created inside my buttons container
 }
 
@@ -86,6 +145,8 @@ function createButtons(string) {
 function createQuizElement(object) {
   // this object has all the things which we require - question, options, answer (to validate)
   // create question container
+
+  mainContainer.innerHTML = ""; // trying to clear all the previous elements inside my main container
 
   let questionElement = document.createElement("h3");
   questionElement.innerText = object.question;
@@ -132,4 +193,4 @@ function createQuizElement(object) {
   mainContainer.append(questionElement, optionsContainer, buttonsContainer);
 }
 
-createQuizElement(quiz[0]);
+createQuizElement(quiz[question]); // Initially when the UI is loaded first question should be shown
